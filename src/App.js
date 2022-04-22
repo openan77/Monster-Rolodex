@@ -1,48 +1,44 @@
 import './App.css';
-import { Component } from 'react';
+import { useState , useEffect } from 'react';
 
 import SearchBox from './components/search-box/search-box.component';
 import CardList from './components/card-list/card-list.component';
 
-class App  extends Component{
-  constructor(){
-    super();
+const App = () => {
+  const [searchfield,setsearchfield] = useState('');
+  const [monsters,setmonsters] = useState([]);
+  const [filtermonsters,setfiltermonsters] = useState(monsters);
 
-    this.state = {
-      monsters:[],
-      searchfield:''
-    }
-  }
-
-  searchOnchange = (event)=>{
-    const searchstring = event.target.value.toLowerCase();
-    this.setState( { searchfield : searchstring} );
-  };
-
-  componentDidMount(){
+  useEffect(()=>{
     fetch('https://jsonplaceholder.typicode.com/users')
     .then((response) => response.json())
-    .then((users) => this.setState( {monsters:users} ) )
+    .then((users) => setmonsters(users) )
+  },[])
+
+  useEffect(()=>{
+    const newfiltermonster = monsters.filter(
+      (monster) => { return monster.name.toLowerCase().includes(searchfield)}
+    )
+    setfiltermonsters(newfiltermonster)
+  },[monsters,searchfield])
+
+  const searchOnchange = (event) => {
+    const searchstring = event.target.value.toLowerCase();
+    setsearchfield(searchstring);
   };
 
-  render(){
+  return (
+    <div className="App">
+      <h1 className='app-title'>Monsters Rolodex</h1>
+      <SearchBox className='search-box' placeholder='Search the Monster!' onChange={searchOnchange} />
+      <CardList monsters = { filtermonsters }/>
+    </div>
+  );
+}
 
-    const {monsters,searchfield} = this.state;
-    const {searchOnchange} = this;
 
-    const filtermonster = monsters.filter(
-      (monster) => { return monster.name.toLowerCase().includes(searchfield)}
-    );
 
-    return (
-      <div className="App">
-        <SearchBox className='search-box' placeholder='Search the Monster!' onChange={searchOnchange} />
-        <CardList monsters = { filtermonster }/>
-      </div>
-    );
-  }
 
-} 
 
 
 
